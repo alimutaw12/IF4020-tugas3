@@ -287,3 +287,53 @@ def CFB_decrypt(blocks, keys, IV):
         lo = lo + 1
 
     return blocks
+
+def OFB(blocks, keys, IV):
+    print('mode OFB')
+    lo = 1
+    for k in keys:
+        temp = IV
+        for i in range(len(blocks)):
+            if i == 0:
+                block = IV
+            else:
+                block = temp
+
+            block = (int.from_bytes(block,byteorder="big") ^ int.from_bytes(k,byteorder="big")).to_bytes(16,byteorder="big")
+            block = S1Process(block)
+            block = r4Shift(block)
+            block = P1Process(block)
+            temp = block
+            block = (int.from_bytes(blocks[i],byteorder="big") ^ int.from_bytes(block,byteorder="big")).to_bytes(16,byteorder="big")
+
+            blocks[i] = block
+        progressbar(lo, 11, 11)
+        lo = lo + 1
+
+    return blocks
+
+def OFB_decrypt(blocks, keys, IV):
+    print('mode OFB')
+    lo = 1
+    resultingBlock = blocks.copy()
+    for k in keys:
+        temp = IV
+        for i in range(len(resultingBlock)):
+            if i == 0:
+                block = IV
+            else:
+                block = temp
+
+            block = (int.from_bytes(block,byteorder="big") ^ int.from_bytes(k,byteorder="big")).to_bytes(16,byteorder="big")
+            block = S1Process(block)
+            block = r4Shift(block)
+            block = P1Process(block)
+            temp = block
+            block = (int.from_bytes(resultingBlock[i],byteorder="big") ^ int.from_bytes(block,byteorder="big")).to_bytes(16,byteorder="big")
+
+            resultingBlock[i] = block
+        blocks = resultingBlock.copy()
+        progressbar(lo, 11, 11)
+        lo = lo + 1
+
+    return blocks
