@@ -1,4 +1,4 @@
-# if4020-tugas1
+# if4020-tugas3
 
 How to run:
 1. Jalankan `pip install flask`
