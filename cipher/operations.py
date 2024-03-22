@@ -1,5 +1,5 @@
 import numpy as np
-from helper import *
+from cipher.helper import *
 
 def keySchedule(key, num=10):
     # 128 bit key

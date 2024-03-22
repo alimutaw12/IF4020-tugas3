@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Block Cipher</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh' crossorigin='anonymous'>
+</head>
+<body>
+
+    <div class="container">
+        <div class="form-group">
+            <label for="cipher">Pilih jenis cipher</label>
+            <select class="form-control" id="cipher">
+                <option value="1">Vigenere Cipher Standard</option>
+                <option value="2">Auto Key Vigenere Cipher</option>
+                <option value="3">Extended Vigenere Cipher</option>
+                <option value="4">Playfair Cipher</option>
+                <option value="5">Affine Cipher</option>
+                <option value="6">Hill Cipher</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="cipher">Pilih Input</label>
+            <select class="form-control" id="type">
+                <option value="text">Text</option>
+                <option value="file">File</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="form-group-text">
+            <label for="text">Text</label>
+            <textarea class="form-control" id="text" rows="2"></textarea>
+        </div>
+
+        <div class="form-group" id="form-group-file" style="display: none;">
+            <label for="file">File</label>
+            <input type="file" id="fileInput">
+        </div>
+        
+        <div class="form-group">
+            <label for="key">Key</label>
+            <textarea class="form-control" id="key" rows="1"></textarea>
+        </div>
+        
+        <button class="btn btn-encrypt btn-success mr-3">Encrypt</button>
+        <button class="btn btn-decrypt btn-danger">Decrypt</button>
+        
+        <div class="form-group" id="result-group" style="display: none;">
+            <label id="label-result" for="result-text"></label>
+            <textarea class="form-control" id="result-text" rows="2" disabled></textarea>
+            <label for="result-text">Key</label>
+            <textarea class="form-control" id="result-key" rows="2" disabled></textarea>
+        </div>
+
+        <div class="form-group" id="result-group-file" style="display: none;">
+            <a id="result-link" href="#">Download</a>
+        </div>
+    
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+        const text = document.querySelector("#text");
+        const result = document.querySelector("#result-group");
+        const resultFile = document.querySelector("#result-group-file");
+        const labelResult = document.querySelector("#label-result");
+        const textResult = document.querySelector("#result-group #result-text");
+        const keyResult = document.querySelector("#result-group #result-key");
+        const linkResult = document.querySelector("#result-group-file #result-link");
+        document.querySelector(".btn-encrypt").addEventListener("click", function(event) {
+            event.preventDefault();
+            const type = $('#type').val();
+
+            if (type == 'text') {
+                encryptText();
+            } else {
+                encryptFile();
+            }
+        });
+
+        document.querySelector("#type").addEventListener("change", function(event) {
+            event.preventDefault();
+
+            const type = $('#type').val();
+
+            if (type == 'text') {
+                document.querySelector("#form-group-text").style.display = "block";
+                document.querySelector("#form-group-file").style.display = "none";
+            } else {
+                document.querySelector("#form-group-file").style.display = "block";
+                document.querySelector("#form-group-text").style.display = "none";
+            }
+        });
+
+        function encryptText() {
+            const value = $('#text').val();
+            const key = $('#key').val();
+            const cipher = $('#cipher').val();
+
+            fetch(`/encrypt`, {
+                method: 'POST',
+                // Adding body or contents to send
+                body: JSON.stringify({
+                    plainText: value,
+                    key: key,
+                    cipher: cipher
+                }),
+                
+                // Adding headers to the request
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultFile.style.display = "none";
+                result.style.display = "block";
+                labelResult.innerHTML = "Hasil encrypt"
+                textResult.innerHTML = data.chipherText;
+                keyResult.innerHTML = data.key;
+            })
+            .catch(function(err) {
+                console.error(err);
+            })
+        }
+        function encryptFile() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            var nameInput = document.getElementById('key').value;
+            var formData = new FormData();
+            formData.append('file', file);
+            // formData.append('name', nameInput);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/upload', true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    resultFile.style.display = "block";
+                    linkResult.href = response.link;
+                    linkResult.innerHTML = response.filename;
+                    result.style.display = "none";
+                } else {
+                    resultFile.style.display = "none";
+                    linkResult.href = '#';
+                    linkResult.innerHTML = 'Error';
+                    result.style.display = "none";
+                }
+            };
+            xhr.send(formData);
+        }
+
+        document.querySelector(".btn-decrypt").addEventListener("click", function(event) {
+            event.preventDefault();
+
+            const value = $('#text').val();
+            const key = $('#key').val();
+            const cipher = $('#cipher').val();
+
+            fetch(`/decrypt`, {
+                method: 'POST',
+                // Adding body or contents to send
+                body: JSON.stringify({
+                    plainText: value,
+                    key: key,
+                    cipher: cipher
+                }),
+                
+                // Adding headers to the request
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultFile.style.display = "none";
+                result.style.display = "block";
+                labelResult.innerHTML = "Hasil decrypt"
+                textResult.innerHTML = data.plainText;
+                keyResult.innerHTML = data.key;
+            })
+            .catch(function(err) {
+                console.error(err);
+            })
+        });
+    </script>
+</body>
+</html>

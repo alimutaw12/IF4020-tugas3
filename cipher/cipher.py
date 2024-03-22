@@ -1,4 +1,4 @@
-from operations import *
+from cipher.operations import *
 from datetime import datetime
 import time
 
@@ -107,7 +107,6 @@ def decrypt(ciphertext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=1
 
     return plaintext.rstrip(b'\x00')
 
-
 if __name__ == "__main__":
     print("Welcome")
     print("Operation:")
@@ -124,7 +123,7 @@ if __name__ == "__main__":
         ext = filename.split(".")[-1]
         with open(filename, 'rb') as file:
             plaintext = file.read()
-        #     print(plaintext)
+            # print(plaintext)
         # file = open(plaintext, 'rb')
         # plaintext = file.read()
     elif (op == 2):
