@@ -25,6 +25,8 @@ def encrypt(plaintext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10
     match mode:
         case "cbc":
             blocks = CBC(blocks, keys, IV)
+        case "cfb":
+            blocks = CFB(blocks, keys, IV)
         case _:
             blocks = ECB(blocks, keys, IV)
 
@@ -62,6 +64,8 @@ def decrypt(ciphertext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=1
     match mode:
         case "cbc":
             resultingBlock = CBC_decrypt(blocks, keys, IV)
+        case "cfb":
+            resultingBlock = CFB_decrypt(blocks, keys, IV)
         case _:
             resultingBlock = ECB_decrypt(blocks, keys, IV)
 
