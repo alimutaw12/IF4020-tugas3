@@ -8,14 +8,10 @@
 
     <div class="container">
         <div class="form-group">
-            <label for="cipher">Pilih jenis cipher</label>
-            <select class="form-control" id="cipher">
-                <option value="1">Vigenere Cipher Standard</option>
-                <option value="2">Auto Key Vigenere Cipher</option>
-                <option value="3">Extended Vigenere Cipher</option>
-                <option value="4">Playfair Cipher</option>
-                <option value="5">Affine Cipher</option>
-                <option value="6">Hill Cipher</option>
+            <label for="cipher">Pilih Mode</label>
+            <select class="form-control" id="mode">
+                <option value="ecb">Electronic Codebook (ECB)</option>
+                <option value="cbc">Cipher Block Chaining (CBC)</option>
             </select>
         </div>
 
@@ -102,7 +98,7 @@
         function encryptText() {
             const value = $('#text').val();
             const key = $('#key').val();
-            const cipher = $('#cipher').val();
+            const mode = $('#mode').val();
 
             fetch(`/encrypt`, {
                 method: 'POST',
@@ -110,7 +106,7 @@
                 body: JSON.stringify({
                     plainText: value,
                     key: key,
-                    cipher: cipher
+                    mode: mode
                 }),
                 
                 // Adding headers to the request
@@ -136,10 +132,10 @@
         function encryptFile() {
             var fileInput = document.getElementById('fileInput');
             var file = fileInput.files[0];
-            var nameInput = document.getElementById('key').value;
+            var mode = document.getElementById('mode').value;
             var formData = new FormData();
             formData.append('file', file);
-            // formData.append('name', nameInput);
+            formData.append('mode', mode);
 
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/upload', true);
@@ -160,45 +156,13 @@
             xhr.send(formData);
         }
 
-        function decryptText() {
-            const value = $('#text').val();
-            const key = $('#key').val();
-            const cipher = $('#cipher').val();
-
-            fetch(`/decrypt`, {
-                method: 'POST',
-                // Adding body or contents to send
-                body: JSON.stringify({
-                    plainText: value,
-                    key: key,
-                    cipher: cipher
-                }),
-                
-                // Adding headers to the request
-                headers: {
-                    "Content-type": "application/json; charset=UTF-8"
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                resultFile.style.display = "none";
-                result.style.display = "block";
-                labelResult.innerHTML = "Hasil decrypt"
-                textResult.innerHTML = data.plainText;
-                keyResult.innerHTML = data.key;
-            })
-            .catch(function(err) {
-                console.error(err);
-            })
-        }
-
         function decryptFile() {
             var fileInput = document.getElementById('fileInput');
             var file = fileInput.files[0];
-            var nameInput = document.getElementById('key').value;
+            var mode = document.getElementById('mode').value;
             var formData = new FormData();
             formData.append('file', file);
-            // formData.append('name', nameInput);
+            formData.append('mode', mode);
 
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/decrypt-upload', true);

@@ -2,7 +2,7 @@ from cipher.operations import *
 from datetime import datetime
 import time    
 
-def encrypt(plaintext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10):
+def encrypt(plaintext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10, mode='ecb'):
     # start timer
     start = time.time()
 
@@ -19,10 +19,14 @@ def encrypt(plaintext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10
     # split plaintext into blocks of 16 bytes
     blocks = [plaintext[i:i+16] for i in range(0, len(plaintext), 16)]
 
-    # make 16 keys
+    # make 10 keys
     keys = keySchedule(key, num_rounds)
 
-    blocks = CBC(blocks, keys, IV)
+    match mode:
+        case "cbc":
+            blocks = CBC(blocks, keys, IV)
+        case _:
+            blocks = ECB(blocks, keys, IV)
 
     # join blocks of 16 bytes into one ciphertext
     ciphertext = b''
@@ -37,7 +41,7 @@ def encrypt(plaintext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10
 
     return ciphertext
 
-def decrypt(ciphertext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10):
+def decrypt(ciphertext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10, mode='ecb'):
     #start timer
     start = time.time()
 
@@ -51,11 +55,15 @@ def decrypt(ciphertext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=1
     # split ciphertext into blocks of 16 bytes
     blocks = [ciphertext[i:i+16] for i in range(0, len(ciphertext), 16)]
 
-    # make 16 keys
+    # make 10 keys
     keys = keySchedule(key, num_rounds)
     keys = keys[::-1]
 
-    resultingBlock = CBC_decrypt(blocks, keys, IV)
+    match mode:
+        case "cbc":
+            resultingBlock = CBC_decrypt(blocks, keys, IV)
+        case _:
+            resultingBlock = ECB_decrypt(blocks, keys, IV)
 
     # join blocks of 16 bytes into one ciphertext
     plaintext = b''

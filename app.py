@@ -12,10 +12,11 @@ def main():
 @app.route('/encrypt', methods=['POST'])
 def routeEncrypt():
     _form = request.json
+    mode = _form['mode']
     plaintext = str.encode(_form['plainText'])
     key = 'PdSgVkYp3s6v8y/B'
     IV = 'dRgUkXp2r5u8x/A?'
-    result_ciphertext = encrypt(plaintext, key, IV=IV)
+    result_ciphertext = encrypt(plaintext, key, IV=IV, mode=mode)
 
     filename = datetime.now().strftime("%d-%m-%Y %H.%M.%S") + '.txt'
 
@@ -49,9 +50,10 @@ def upload():
     file = open(f'storage/{filename}', 'rb')
     plaintext = file.read()
 
+    mode = request.form['mode']
     key = 'PdSgVkYp3s6v8y/B'
     IV = 'dRgUkXp2r5u8x/A?'
-    result_ciphertext = encrypt(plaintext, key, IV=IV)
+    result_ciphertext = encrypt(plaintext, key, IV=IV, mode=mode)
 
     filename = datetime.now().strftime("%d-%m-%Y %H.%M.%S") + '.' + ext
 
@@ -76,9 +78,10 @@ def decryptUpload():
     file = open(f'storage/{filename}', 'rb')
     ciphertext = file.read()
 
+    mode = request.form['mode']
     key = 'PdSgVkYp3s6v8y/B'
     IV = 'dRgUkXp2r5u8x/A?'
-    result_plaintext = decrypt(ciphertext, key, IV=IV)
+    result_plaintext = decrypt(ciphertext, key, IV=IV, mode=mode)
 
     filename = datetime.now().strftime("%d-%m-%Y %H.%M.%S") + '.' + ext
 
