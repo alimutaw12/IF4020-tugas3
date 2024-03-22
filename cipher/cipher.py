@@ -30,7 +30,7 @@ def encrypt(plaintext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10
         case "ofb":
             blocks = OFB(blocks, keys, IV)
         case "ctr":
-            blocks = CTR(blocks, keys)
+            blocks = counter(blocks, keys)
         case _:
             blocks = ECB(blocks, keys, IV)
 
@@ -73,7 +73,7 @@ def decrypt(ciphertext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=1
         case "ofb":
             resultingBlock = OFB_decrypt(blocks, keys, IV)
         case "ctr":
-            resultingBlock = CTR_decrypt(blocks, keys)
+            resultingBlock = counter_decrypt(blocks, keys)
         case _:
             resultingBlock = ECB_decrypt(blocks, keys, IV)
 
