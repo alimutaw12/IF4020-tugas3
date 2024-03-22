@@ -337,3 +337,41 @@ def OFB_decrypt(blocks, keys, IV):
         lo = lo + 1
 
     return blocks
+
+def counter(blocks, keys):
+    print('mode CTR')
+    lo = 1
+    count = 1
+    for k in keys:
+        for i in range(len(blocks)):
+            counter = bytes(count)
+            counter = counter + bytes(16 - len(counter) % 16)
+            vector = S1Process(counter)
+            vector = (int.from_bytes(vector,byteorder="big") ^ int.from_bytes(k,byteorder="big")).to_bytes(16,byteorder="big")
+            blocks[i] = (int.from_bytes(blocks[i],byteorder="big") ^ int.from_bytes(vector,byteorder="big")).to_bytes(16,byteorder="big")
+        count += 1
+        progressbar(lo, 11, 11)
+        lo = lo + 1
+
+    return blocks
+
+def counter_decrypt(blocks, keys, num_rounds=16):
+    print('mode CTR')
+    lo = 1
+    resultingBlock = blocks.copy()
+
+    count = 1
+    # encrypt each block
+    for k in keys:
+        for i in range(len(resultingBlock)):
+            counter = bytes(count)
+            counter = counter + bytes(16 - len(counter) % 16)
+            resultingBlock[i] = S1Process_reverse(counter)
+            resultingBlock[i] = (int.from_bytes(resultingBlock[i],byteorder="big") ^ int.from_bytes(k,byteorder="big")).to_bytes(16,byteorder="big")
+            resultingBlock[i] = (int.from_bytes(resultingBlock[i],byteorder="big") ^ int.from_bytes(blocks[i],byteorder="big")).to_bytes(16,byteorder="big")
+        count += 1
+        blocks = resultingBlock.copy()
+        progressbar(lo, 11, 11)
+        lo = lo + 1
+
+    return blocks
