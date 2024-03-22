@@ -14,8 +14,8 @@ def routeEncrypt():
     _form = request.json
     mode = _form['mode']
     plaintext = str.encode(_form['plainText'])
-    key = 'PdSgVkYp3s6v8y/B'
-    IV = 'dRgUkXp2r5u8x/A?'
+    key = _form['key']
+    IV = _form['iv']
     result_ciphertext = encrypt(plaintext, key, IV=IV, mode=mode)
 
     filename = datetime.now().strftime("%d-%m-%Y %H.%M.%S") + '.txt'
@@ -51,8 +51,8 @@ def upload():
     plaintext = file.read()
 
     mode = request.form['mode']
-    key = 'PdSgVkYp3s6v8y/B'
-    IV = 'dRgUkXp2r5u8x/A?'
+    key = request.form['key']
+    IV = request.form['iv']
     result_ciphertext = encrypt(plaintext, key, IV=IV, mode=mode)
 
     filename = datetime.now().strftime("%d-%m-%Y %H.%M.%S") + '.' + ext
@@ -79,8 +79,8 @@ def decryptUpload():
     ciphertext = file.read()
 
     mode = request.form['mode']
-    key = 'PdSgVkYp3s6v8y/B'
-    IV = 'dRgUkXp2r5u8x/A?'
+    key = request.form['key']
+    IV = request.form['iv']
     result_plaintext = decrypt(ciphertext, key, IV=IV, mode=mode)
 
     filename = datetime.now().strftime("%d-%m-%Y %H.%M.%S") + '.' + ext
