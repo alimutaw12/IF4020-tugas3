@@ -22,17 +22,17 @@
         <div class="form-group">
             <label for="cipher">Pilih Input</label>
             <select class="form-control" id="type">
-                <option value="text">Text</option>
                 <option value="file">File</option>
+                <option value="text">Text</option>
             </select>
         </div>
         
-        <div class="form-group" id="form-group-text">
+        <div class="form-group" id="form-group-text" style="display: none;">
             <label for="text">Text</label>
             <textarea class="form-control" id="text" rows="2"></textarea>
         </div>
 
-        <div class="form-group" id="form-group-file" style="display: none;">
+        <div class="form-group" id="form-group-file">
             <label for="file">File</label>
             <input type="file" id="fileInput">
         </div>
@@ -50,6 +50,7 @@
             <textarea class="form-control" id="result-text" rows="2" disabled></textarea>
             <label for="result-text">Key</label>
             <textarea class="form-control" id="result-key" rows="2" disabled></textarea>
+            <a id="result-link-encrypt" href="#">Download</a>
         </div>
 
         <div class="form-group" id="result-group-file" style="display: none;">
@@ -70,6 +71,7 @@
         const textResult = document.querySelector("#result-group #result-text");
         const keyResult = document.querySelector("#result-group #result-key");
         const linkResult = document.querySelector("#result-group-file #result-link");
+        const linkResultEncrypt = document.querySelector("#result-group #result-link-encrypt");
         document.querySelector(".btn-encrypt").addEventListener("click", function(event) {
             event.preventDefault();
             const type = $('#type').val();
@@ -89,9 +91,11 @@
             if (type == 'text') {
                 document.querySelector("#form-group-text").style.display = "block";
                 document.querySelector("#form-group-file").style.display = "none";
+                document.querySelector(".btn-decrypt").style.display = "none";
             } else {
                 document.querySelector("#form-group-file").style.display = "block";
                 document.querySelector("#form-group-text").style.display = "none";
+                document.querySelector(".btn-decrypt").style.display = "inline";
             }
         });
 
@@ -121,11 +125,14 @@
                 labelResult.innerHTML = "Hasil encrypt"
                 textResult.innerHTML = data.chipherText;
                 keyResult.innerHTML = data.key;
+                linkResultEncrypt.href = data.link;
+                linkResultEncrypt.innerHTML = data.filename;
             })
             .catch(function(err) {
                 console.error(err);
             })
         }
+        
         function encryptFile() {
             var fileInput = document.getElementById('fileInput');
             var file = fileInput.files[0];
@@ -153,9 +160,7 @@
             xhr.send(formData);
         }
 
-        document.querySelector(".btn-decrypt").addEventListener("click", function(event) {
-            event.preventDefault();
-
+        function decryptText() {
             const value = $('#text').val();
             const key = $('#key').val();
             const cipher = $('#cipher').val();
@@ -185,6 +190,39 @@
             .catch(function(err) {
                 console.error(err);
             })
+        }
+
+        function decryptFile() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            var nameInput = document.getElementById('key').value;
+            var formData = new FormData();
+            formData.append('file', file);
+            // formData.append('name', nameInput);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/decrypt-upload', true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    resultFile.style.display = "block";
+                    linkResult.href = response.link;
+                    linkResult.innerHTML = response.filename;
+                    result.style.display = "none";
+                } else {
+                    resultFile.style.display = "none";
+                    linkResult.href = '#';
+                    linkResult.innerHTML = 'Error';
+                    result.style.display = "none";
+                }
+            };
+            xhr.send(formData);
+        }
+
+        document.querySelector(".btn-decrypt").addEventListener("click", function(event) {
+            event.preventDefault();
+
+            decryptFile();
         });
     </script>
 </body>

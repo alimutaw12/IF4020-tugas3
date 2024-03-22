@@ -11,7 +11,8 @@ def main():
 
 @app.route('/encrypt', methods=['POST'])
 def routeEncrypt():
-    plaintext = str.encode('Lorem ipsum dolor sit amet, consectetur adipiscing elit.')
+    _form = request.json
+    plaintext = str.encode(_form['plainText'])
     key = 'PdSgVkYp3s6v8y/B'
     IV = 'dRgUkXp2r5u8x/A?'
     result_ciphertext = encrypt(plaintext, key, IV=IV)
@@ -56,6 +57,33 @@ def upload():
 
     file = open(f'storage/{filename}', 'wb')
     file.write(result_ciphertext)
+    
+    data = {
+        "link": request.scheme + '://' + request.host + '/download/' + filename,
+        "filename": filename
+    }
+    
+    return jsonify(data)
+
+@app.route('/decrypt-upload', methods=['POST'])
+def decryptUpload():
+    file = request.files['file']
+    # Save the file and process the name as needed
+    file.save('storage/' + file.filename)
+    
+    filename = file.filename
+    ext = filename.split(".")[-1]
+    file = open(f'storage/{filename}', 'rb')
+    ciphertext = file.read()
+
+    key = 'PdSgVkYp3s6v8y/B'
+    IV = 'dRgUkXp2r5u8x/A?'
+    result_plaintext = decrypt(ciphertext, key, IV=IV)
+
+    filename = datetime.now().strftime("%d-%m-%Y %H.%M.%S") + '.' + ext
+
+    file = open(f'storage/{filename}', 'wb')
+    file.write(result_plaintext)
     
     data = {
         "link": request.scheme + '://' + request.host + '/download/' + filename,

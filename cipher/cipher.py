@@ -1,12 +1,6 @@
 from cipher.operations import *
 from datetime import datetime
-import time
-
-def progressbar(current_value,total_value,bar_lengh): 
-    percentage = int((current_value/total_value)*100)                                            
-    progress = int((bar_lengh * current_value ) / total_value)                                   
-    loadbar = "Progress: {}%".format(percentage)
-    print(loadbar)     
+import time    
 
 def encrypt(plaintext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10):
     # start timer
@@ -28,22 +22,7 @@ def encrypt(plaintext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=10
     # make 16 keys
     keys = keySchedule(key, num_rounds)
 
-    # encrypt each block
-    lo = 1
-    for k in keys:
-        for i in range(len(blocks)):
-            # print(i)
-            # if i == 0:
-            #     blocks[i] = (int.from_bytes(blocks[i],byteorder="big") ^ int.from_bytes(IV,byteorder="big")).to_bytes(16,byteorder="big")
-            # else:
-            #     blocks[i] = (int.from_bytes(blocks[i],byteorder="big") ^ int.from_bytes(blocks[i-1],byteorder="big")).to_bytes(16,byteorder="big")
-            blocks[i] = (int.from_bytes(blocks[i],byteorder="big") ^ int.from_bytes(k,byteorder="big")).to_bytes(16,byteorder="big")
-            
-            blocks[i] = S1Process(blocks[i])
-            blocks[i] = r4Shift(blocks[i])
-            blocks[i] = P1Process(blocks[i])
-        progressbar(lo, 11, 11)
-        lo = lo + 1
+    blocks = CBC(blocks, keys, IV)
 
     # join blocks of 16 bytes into one ciphertext
     ciphertext = b''
@@ -71,29 +50,12 @@ def decrypt(ciphertext, key, IV='\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0', num_rounds=1
     
     # split ciphertext into blocks of 16 bytes
     blocks = [ciphertext[i:i+16] for i in range(0, len(ciphertext), 16)]
-    resultingBlock = blocks.copy()
 
     # make 16 keys
     keys = keySchedule(key, num_rounds)
     keys = keys[::-1]
 
-    # encrypt each block
-    lo = 1
-    for k in keys:
-        for i in range(len(resultingBlock)):
-            resultingBlock[i] = P1Process_reverse(blocks[i])
-            resultingBlock[i] = r4Shift_reverse(resultingBlock[i])
-            resultingBlock[i] = S1Process_reverse(resultingBlock[i])
-            
-            resultingBlock[i] = (int.from_bytes(resultingBlock[i],byteorder="big") ^ int.from_bytes(k,byteorder="big")).to_bytes(16,byteorder="big")
-
-            # if i == 0:
-            #     resultingBlock[i] = (int.from_bytes(resultingBlock[i],byteorder="big") ^ int.from_bytes(IV,byteorder="big")).to_bytes(16,byteorder="big")
-            # else:
-            #     resultingBlock[i] = (int.from_bytes(resultingBlock[i],byteorder="big") ^ int.from_bytes(blocks[i-1],byteorder="big")).to_bytes(16,byteorder="big")
-        blocks = resultingBlock.copy()
-        progressbar(lo, 11, 11)
-        lo = lo + 1
+    resultingBlock = CBC_decrypt(blocks, keys, IV)
 
     # join blocks of 16 bytes into one ciphertext
     plaintext = b''
