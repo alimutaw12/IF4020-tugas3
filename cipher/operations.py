@@ -347,6 +347,8 @@ def counter(blocks, keys):
             counter = bytes(count)
             counter = counter + bytes(16 - len(counter) % 16)
             vector = S1Process(counter)
+            vector = r4Shift(vector)
+            vector = P1Process(vector)
             vector = (int.from_bytes(vector,byteorder="big") ^ int.from_bytes(k,byteorder="big")).to_bytes(16,byteorder="big")
             blocks[i] = (int.from_bytes(blocks[i],byteorder="big") ^ int.from_bytes(vector,byteorder="big")).to_bytes(16,byteorder="big")
         count += 1
@@ -366,7 +368,9 @@ def counter_decrypt(blocks, keys, num_rounds=16):
         for i in range(len(resultingBlock)):
             counter = bytes(count)
             counter = counter + bytes(16 - len(counter) % 16)
-            resultingBlock[i] = S1Process_reverse(counter)
+            resultingBlock[i] = P1Process_reverse(blocks[i])
+            resultingBlock[i] = r4Shift_reverse(resultingBlock[i])
+            resultingBlock[i] = S1Process_reverse(resultingBlock[i])
             resultingBlock[i] = (int.from_bytes(resultingBlock[i],byteorder="big") ^ int.from_bytes(k,byteorder="big")).to_bytes(16,byteorder="big")
             resultingBlock[i] = (int.from_bytes(resultingBlock[i],byteorder="big") ^ int.from_bytes(blocks[i],byteorder="big")).to_bytes(16,byteorder="big")
         count += 1
