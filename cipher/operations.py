@@ -368,7 +368,7 @@ def counter_decrypt(blocks, keys, num_rounds=16):
         for i in range(len(resultingBlock)):
             counter = bytes(count)
             counter = counter + bytes(16 - len(counter) % 16)
-            resultingBlock[i] = P1Process_reverse(blocks[i])
+            resultingBlock[i] = P1Process_reverse(counter)
             resultingBlock[i] = r4Shift_reverse(resultingBlock[i])
             resultingBlock[i] = S1Process_reverse(resultingBlock[i])
             resultingBlock[i] = (int.from_bytes(resultingBlock[i],byteorder="big") ^ int.from_bytes(k,byteorder="big")).to_bytes(16,byteorder="big")
